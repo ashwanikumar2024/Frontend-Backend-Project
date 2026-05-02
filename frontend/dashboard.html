@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | SportsFit</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body data-page="dashboard">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+    <header class="topbar glass">
+      <h1>Dashboard</h1>
+      <nav class="topbar-actions">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-secondary" href="workouts.html">Workout Tracker</a>
+        <a class="btn-secondary" href="nutrition.html">Nutrition AI</a>
+        <a class="btn-secondary" href="community.html">Community</a>
+        <button class="btn-danger" id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h2 id="greeting">Welcome!</h2>
+        <p id="goalText"></p>
+      </section>
+
+      <section class="grid-3">
+        <article class="card stat-card">
+          <h3>Total Workouts</h3>
+          <p id="totalWorkouts">0</p>
+        </article>
+        <article class="card stat-card">
+          <h3>Total Calories</h3>
+          <p id="totalCalories">0</p>
+        </article>
+        <article class="card stat-card">
+          <h3>Recent Activity</h3>
+          <p id="recentActivity">No recent activity yet.</p>
+        </article>
+      </section>
+
+      <section class="grid-2">
+        <article class="card">
+          <h3>Weekly Calories Trend</h3>
+          <canvas id="progressChart"></canvas>
+        </article>
+        <article class="card">
+          <h3>Workout Recommendation</h3>
+          <p id="recommendationText"></p>
+        </article>
+      </section>
+
+      <section class="card nutrition-preview">
+        <h3>Nutrition Snapshot</h3>
+        <p id="nutritionPreviewText">Set up your nutrition profile to view smart diet guidance.</p>
+        <div class="topbar-actions">
+          <a class="btn-primary" href="nutrition.html">Open Nutrition Calculator</a>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <article class="card">
+          <h3>BMI Calculator</h3>
+          <div class="bmi-grid">
+            <input id="bmiHeight" type="number" placeholder="Height (cm)" />
+            <input id="bmiWeight" type="number" placeholder="Weight (kg)" />
+            <button class="btn-primary" id="calculateBmiBtn">Calculate BMI</button>
+          </div>
+          <p id="bmiResult"></p>
+        </article>
+        <article class="card tips-card">
+          <h3>Daily Fitness Tip</h3>
+          <p id="dailyTip"></p>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

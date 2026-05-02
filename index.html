@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sports & Fitness Innovation Platform</title>
+    <link rel="stylesheet" href="frontend/styles.css" />
+  </head>
+  <body data-page="home">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+    <header class="topbar glass">
+      <a class="brand" href="index.html" aria-label="SportsFit Home">SportsFit</a>
+      <nav class="topbar-actions" aria-label="Top navigation">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-primary" href="frontend/auth.html">Login / Register</a>
+      </nav>
+    </header>
+    
+     <main class="container">
+      <section class="hero card gradient">
+        <div class="hero-grid">
+          <div class="hero-copy" data-animate="fade-up" data-delay="0">
+            <div class="hero-kicker">Premium Fitness OS</div>
+            <h1 class="hero-title">Transform Your Fitness Journey</h1>
+            <p class="hero-description">
+              Track workouts, unlock AI-powered recommendations, analyze performance, and connect
+              with a motivated fitness community.
+            </p>
+            <div class="hero-actions">
+              <a
+                class="btn-primary"
+                href="frontend/dashboard.html"
+                data-animate="zoom-in"
+                data-delay="140"
+              >Go to Dashboard</a>
+              <a
+                class="btn-secondary"
+                href="frontend/community.html"
+                data-animate="zoom-in"
+                data-delay="220"
+              >Explore Community</a>
+            </div>
+
+            <div class="hero-social-proof" aria-label="Highlights">
+              <div class="proof-item">
+                <span class="proof-dot" aria-hidden="true"></span>
+                <span><strong>AI</strong> suggestions</span>
+              </div>
+              <div class="proof-item">
+                <span class="proof-dot" aria-hidden="true"></span>
+                <span><strong>Live</strong> analytics</span>
+              </div>
+              <div class="proof-item">
+                <span class="proof-dot" aria-hidden="true"></span>
+                <span><strong>Community</strong> energy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-media" data-animate="fade-left" data-delay="80" aria-hidden="true">
+            <div class="hero-visual">
+              <div class="hero-blob hero-blob-1"></div>
+              <div class="hero-blob hero-blob-2"></div>
+              <div class="hero-blob hero-blob-3"></div>
+
+              <div class="hero-visual-frame">
+                <!-- Stylized fitness + AI illustration (no external asset dependency) -->
+                <svg
+                  class="hero-illustration"
+                  viewBox="0 0 520 520"
+                  role="img"
+                  aria-label="AI-powered fitness illustration"
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  <defs>
+                    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#2563eb" stop-opacity="0.95" />
+                      <stop offset="0.55" stop-color="#3b82f6" stop-opacity="0.9" />
+                      <stop offset="1" stop-color="#14b8a6" stop-opacity="0.85" />
+                    </linearGradient>
+                    <linearGradient id="g2" x1="1" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#14b8a6" stop-opacity="0.85" />
+                      <stop offset="1" stop-color="#2563eb" stop-opacity="0.75" />
+                    </linearGradient>
+                    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                      <feGaussianBlur stdDeviation="10" result="blur" />
+                      <feColorMatrix
+                        in="blur"
+                        type="matrix"
+                        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.6 0"
+                        result="glow"
+                      />
+                      <feMerge>
+                        <feMergeNode in="glow" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+
+                  <!-- Outer panel -->
+                  <rect x="52" y="64" width="416" height="392" rx="34" fill="rgba(255,255,255,0.06)" />
+                  <rect x="52" y="64" width="416" height="392" rx="34" fill="url(#g1)" opacity="0.12" />
+                  <rect x="52" y="64" width="416" height="392" rx="34" fill="none" stroke="rgba(255,255,255,0.22)" />
+
+                  <!-- AI orbit -->
+                  <g filter="url(#softGlow)" opacity="0.95">
+                    <path
+                      d="M125 260c0-86 70-156 156-156s156 70 156 156-70 156-156 156-156-70-156-156Z"
+                      fill="none"
+                      stroke="url(#g2)"
+                      stroke-width="10"
+                      stroke-linecap="round"
+                      opacity="0.35"
+                    />
+                    <path
+                      d="M168 276c18 55 74 96 145 90"
+                      fill="none"
+                      stroke="url(#g2)"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      opacity="0.55"
+                    />
+                    <circle cx="164" cy="266" r="9" fill="#14b8a6" opacity="0.9" />
+                    <circle cx="323" cy="360" r="7" fill="#3b82f6" opacity="0.9" />
+                    <circle cx="374" cy="206" r="6" fill="#2563eb" opacity="0.85" />
+                  </g>
+
+                  <!-- Person silhouette -->
+                  <g>
+                    <circle cx="260" cy="190" r="34" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.26)" />
+                    <path
+                      d="M228 240c14 17 20 28 32 62 9 26 16 55 20 92"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.26)"
+                      stroke-width="12"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M292 240c-14 17-20 28-32 62-9 26-16 55-20 92"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.26)"
+                      stroke-width="12"
+                      stroke-linecap="round"
+                    />
+
+                    <!-- Dumbbells -->
+                    <g opacity="0.9">
+                      <path
+                        d="M190 330h-30"
+                        stroke="rgba(255,255,255,0.28)"
+                        stroke-width="10"
+                        stroke-linecap="round"
+                      />
+                      <path
+                        d="M360 330h30"
+                        stroke="rgba(255,255,255,0.28)"
+                        stroke-width="10"
+                        stroke-linecap="round"
+                      />
+                      <rect x="180" y="314" width="40" height="32" rx="10" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.20)" />
+                      <rect x="300" y="314" width="40" height="32" rx="10" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.20)" />
+                      <path
+                        d="M220 330c18-20 62-20 80 0"
+                        fill="none"
+                        stroke="url(#g1)"
+                        stroke-width="10"
+                        stroke-linecap="round"
+                        opacity="0.55"
+                      />
+                    </g>
+                  </g>
+
+                  <!-- Chart cards -->
+                  <g opacity="0.95">
+                    <rect x="92" y="110" width="170" height="66" rx="16" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" />
+                    <rect x="106" y="126" width="62" height="10" rx="6" fill="url(#g1)" opacity="0.6" />
+                    <rect x="106" y="145" width="106" height="10" rx="6" fill="rgba(255,255,255,0.18)" />
+
+                    <rect x="256" y="386" width="172" height="52" rx="16" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" />
+                    <path d="M280 424c18-24 36-24 54 0s36 24 54 0" fill="none" stroke="url(#g2)" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+                  </g>
+                </svg>
+
+                <div class="hero-pill hero-pill-1">
+                  <span class="hero-pill-label">AI Insight</span>
+                  <span class="hero-pill-value">+12% form</span>
+                </div>
+                <div class="hero-pill hero-pill-2">
+                  <span class="hero-pill-label">Streak</span>
+                  <span class="hero-pill-value">7 days</span>
+                </div>
+                <div class="hero-pill hero-pill-3">
+                  <span class="hero-pill-label">Calories</span>
+                  <span class="hero-pill-value">Active</span>
+                </div>
+              </div>
+
+              <div class="hero-visual-sheen"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-3">
+        <article class="card feature-card" data-animate="fade-up" data-delay="0">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 10v4" />
+              <path d="M7 8v8" />
+              <path d="M7 12h13" />
+              <path d="M17 8v8" />
+              <path d="M17 12h4" />
+            </svg>
+          </div>
+          <h3>Workout Tracking</h3>
+          <p>Log every workout with duration, calories, and notes. Stay consistent every day.</p>
+        </article>
+        <article class="card feature-card" data-animate="fade-up" data-delay="90">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 18H7a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4h1" />
+              <path d="M16 6h1a4 4 0 0 1 4 4v5a4 4 0 0 1-4 4h-1" />
+              <path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0" />
+              <path d="M12 7v2" />
+              <path d="M12 15v2" />
+              <path d="M9 10l1.2 1.2" />
+              <path d="M14.8 13.8L16 15" />
+            </svg>
+          </div>
+          <h3>AI Recommendation Engine</h3>
+          <p>Receive smart workout suggestions based on your goal and recent activity.</p>
+        </article>
+        <article class="card feature-card" data-animate="fade-up" data-delay="180">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v18h18" />
+              <path d="M7 14l3-3 4 4 6-8" />
+              <path d="M7 14v5" />
+              <path d="M10 11v8" />
+              <path d="M14 15v4" />
+              <path d="M20 7v12" />
+            </svg>
+          </div>
+          <h3>Performance Analytics</h3>
+          <p>Visualize weekly and monthly progress trends with rich charts.</p>
+        </article>
+      </section>
+
+      <section class="card tips-card" data-animate="fade-up" data-delay="90">
+        <div class="tips-head">
+          <div class="tips-badge">Today</div>
+          <h3>Daily Fitness Tip</h3>
+        </div>
+        <p id="dailyTip" class="tips-text"></p>
+      </section>
+    </main>
+    <script src="frontend/app.js"></script>
+  </body>
+</html>

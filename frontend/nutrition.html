@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nutrition AI Tracker | SportsFit</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body data-page="nutrition">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+
+    <header class="topbar glass">
+      <h1>Nutrition Calculator + AI Diet Tracker</h1>
+      <nav class="topbar-actions">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn-secondary" href="workouts.html">Workout Tracker</a>
+        <a class="btn-secondary" href="community.html">Community</a>
+        <button class="btn-danger" id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+
+    <main class="container nutrition-layout">
+      <section class="card">
+        <h2>Profile & Goal Setup</h2>
+        <form id="nutritionProfileForm" class="nutrition-form">
+          <input type="number" name="age" placeholder="Age" min="10" max="100" required />
+          <select name="gender" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <input type="number" name="heightCm" placeholder="Height (cm)" min="100" max="250" required />
+          <input type="number" name="weightKg" placeholder="Weight (kg)" min="30" max="250" required />
+          <select name="activityLevel" required>
+            <option value="sedentary">Sedentary</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="active">Active</option>
+          </select>
+          <select name="goal" required>
+            <option value="weight_loss">Weight Loss</option>
+            <option value="maintain" selected>Maintain</option>
+            <option value="weight_gain">Weight Gain</option>
+          </select>
+          <button class="btn-primary" type="submit">Save Profile</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Daily Requirements</h2>
+        <div id="nutritionTargets" class="nutrition-targets"></div>
+      </section>
+
+      <section class="card">
+        <h2>Add Meal</h2>
+        <form id="mealForm" class="nutrition-form">
+          <input type="date" name="date" id="mealDate" required />
+          <select name="mealType" required>
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snacks">Snacks</option>
+          </select>
+          <input type="text" name="search" id="foodSearch" placeholder="Search food (e.g. paneer)" />
+          <select name="foodPick" id="foodPick"></select>
+          <input type="text" name="foodName" id="manualFoodName" placeholder="Or type meal name (must exist in DB)" />
+          <input type="number" step="0.1" min="0.1" name="quantity" placeholder="Quantity" value="1" />
+          <button class="btn-primary" type="submit">Add Meal</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Water Intake Tracker</h2>
+        <form id="waterForm" class="water-form">
+          <input type="number" name="amountMl" min="50" step="50" placeholder="Amount (ml)" required />
+          <button class="btn-primary" type="submit">Log Water</button>
+        </form>
+        <p id="waterProgressText">No water logged yet.</p>
+      </section>
+
+      <section class="card">
+        <h2>Daily Intake vs Required</h2>
+        <div id="intakeProgressBars"></div>
+        <canvas id="nutritionDailyChart"></canvas>
+      </section>
+
+      <section class="card">
+        <h2>Meal Log</h2>
+        <div id="mealLogList" class="list"></div>
+      </section>
+
+      <section class="card">
+        <h2>AI Diet Insights</h2>
+        <div id="aiInsights" class="insight-list"></div>
+        <h3>What To Eat Next</h3>
+        <div id="nextMealSuggestions" class="list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Weekly Progress</h2>
+        <canvas id="nutritionWeeklyChart"></canvas>
+      </section>
+
+      <section class="card">
+        <h2>Weekly Diet Plan (Indian-focused)</h2>
+        <div id="weeklyPlanList" class="list"></div>
+        <h3>Meal Reminders</h3>
+        <ul id="mealReminderList" class="reminder-list"></ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

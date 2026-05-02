@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workout Tracker | SportsFit</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="workouts">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+    <header class="topbar glass">
+      <h1>Workout Tracker</h1>
+      <nav class="topbar-actions">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn-secondary" href="nutrition.html">Nutrition AI</a>
+        <a class="btn-secondary" href="community.html">Community</a>
+        <button class="btn-danger" id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+
+    <main class="container grid-2">
+      <section class="card">
+        <h2>Add / Edit Workout</h2>
+        <form id="workoutForm">
+          <input type="hidden" id="workoutId" />
+          <input type="text" id="workoutType" placeholder="Workout Type" required />
+          <input type="number" id="workoutDuration" placeholder="Duration (minutes)" required />
+          <input type="number" id="workoutCalories" placeholder="Calories Burned" required />
+          <input type="date" id="workoutDate" required />
+          <textarea id="workoutNotes" placeholder="Notes"></textarea>
+          <button class="btn-primary" type="submit">Save Workout</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Workout History</h2>
+        <div id="workoutList" class="list"></div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

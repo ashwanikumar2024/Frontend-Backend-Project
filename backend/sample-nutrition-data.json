@@ -1,0 +1,42 @@
+{
+  "nutritionProfile": {
+    "age": 24,
+    "gender": "male",
+    "heightCm": 175,
+    "weightKg": 72,
+    "activityLevel": "active",
+    "goal": "weight_gain"
+  },
+  "mealEntries": [
+    {
+      "date": "2026-05-01",
+      "mealType": "breakfast",
+      "foodName": "Moong Dal Chilla",
+      "quantity": 1,
+      "nutrients": {
+        "calories": 180,
+        "protein": 10,
+        "carbs": 22,
+        "fats": 5,
+        "fiber": 4
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "mealType": "lunch",
+      "foodName": "Rajma Chawal",
+      "quantity": 1,
+      "nutrients": {
+        "calories": 350,
+        "protein": 14,
+        "carbs": 55,
+        "fats": 8,
+        "fiber": 10
+      }
+    }
+  ],
+  "waterLogs": [
+    { "date": "2026-05-01", "amountMl": 500 },
+    { "date": "2026-05-01", "amountMl": 400 }
+  ]
+}

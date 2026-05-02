@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Community | SportsFit</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="community">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+    <header class="topbar glass">
+      <h1>Community</h1>
+      <nav class="topbar-actions">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-secondary" href="dashboard.html">Dashboard</a>
+        <a class="btn-secondary" href="nutrition.html">Nutrition AI</a>
+        <a class="btn-secondary" href="workouts.html">Workout Tracker</a>
+        <button class="btn-danger" id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+
+    <main class="container grid-2">
+      <section class="card">
+        <h2>Share Update</h2>
+        <form id="postForm">
+          <textarea id="postContent" placeholder="Share your latest fitness achievement..." required></textarea>
+          <button class="btn-primary" type="submit">Post Update</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Community Feed</h2>
+        <div id="postsList" class="list"></div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

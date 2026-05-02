@@ -1,0 +1,42 @@
+{
+  "users": [
+    {
+      "name": "Demo Athlete",
+      "email": "demo@sportsfit.com",
+      "password": "Password123 (plain text for reference only; app stores bcrypt hash)",
+      "role": "user",
+      "goal": "muscle_gain",
+      "age": 24,
+      "heightCm": 175,
+      "weightKg": 72
+    }
+  ],
+  "workouts": [
+    {
+      "type": "Strength Training",
+      "duration": 60,
+      "caloriesBurned": 500,
+      "notes": "Upper body focus"
+    },
+    {
+      "type": "Running",
+      "duration": 35,
+      "caloriesBurned": 320,
+      "notes": "5 km tempo run"
+    },
+    {
+      "type": "HIIT",
+      "duration": 25,
+      "caloriesBurned": 280,
+      "notes": "Core and conditioning"
+    }
+  ],
+  "posts": [
+    {
+      "content": "Crushed my HIIT session today! Feeling stronger every week."
+    },
+    {
+      "content": "New goal: run 10 km under 55 minutes this month."
+    }
+  ]
+}
