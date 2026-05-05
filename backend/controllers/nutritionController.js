@@ -77,6 +77,189 @@ const addNutrients = (items) =>
   );
 
 const getSearchTexts = (food) => [food.name, ...(food.aliases || [])];
+const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const getFoodMealTypes = (food) => {
+  const text = normalize(`${food.name} ${(food.aliases || []).join(" ")}`);
+  const mealTypes = new Set();
+
+  if (/oats|upma|egg|fruit|smoothie|yogurt|toast|chilla/.test(text)) mealTypes.add("breakfast");
+  if (/salad|sprout|smoothie|fruit|nut|yogurt/.test(text)) mealTypes.add("snacks");
+  if (/curry|rajma|rice|roti|paneer|chana/.test(text)) {
+    mealTypes.add("lunch");
+    mealTypes.add("dinner");
+  }
+
+  if (mealTypes.size === 0) {
+    mealTypes.add("lunch");
+    mealTypes.add("dinner");
+  }
+
+  return [...mealTypes];
+};
+
+const estimateMealTypeSplit = (targets, goal) => {
+  const calorieShares =
+    goal === "weight_gain"
+      ? { breakfast: 0.24, lunch: 0.32, snacks: 0.16, dinner: 0.28 }
+      : goal === "weight_loss"
+        ? { breakfast: 0.25, lunch: 0.3, snacks: 0.12, dinner: 0.33 }
+        : { breakfast: 0.24, lunch: 0.31, snacks: 0.13, dinner: 0.32 };
+
+  return {
+    breakfast: {
+      calories: round1(targets.calories * calorieShares.breakfast),
+      protein: round1(targets.protein * 0.24),
+      carbs: round1(targets.carbs * calorieShares.breakfast),
+      fats: round1(targets.fats * 0.22),
+      fiber: round1(targets.fiber * 0.22),
+    },
+    lunch: {
+      calories: round1(targets.calories * calorieShares.lunch),
+      protein: round1(targets.protein * 0.31),
+      carbs: round1(targets.carbs * calorieShares.lunch),
+      fats: round1(targets.fats * 0.31),
+      fiber: round1(targets.fiber * 0.3),
+    },
+    snacks: {
+      calories: round1(targets.calories * calorieShares.snacks),
+      protein: round1(targets.protein * 0.13),
+      carbs: round1(targets.carbs * calorieShares.snacks),
+      fats: round1(targets.fats * 0.13),
+      fiber: round1(targets.fiber * 0.14),
+    },
+    dinner: {
+      calories: round1(targets.calories * calorieShares.dinner),
+      protein: round1(targets.protein * 0.32),
+      carbs: round1(targets.carbs * calorieShares.dinner),
+      fats: round1(targets.fats * 0.34),
+      fiber: round1(targets.fiber * 0.34),
+    },
+  };
+};
+
+const summarizeMealHistory = (meals) => {
+  const stats = {};
+
+  meals.forEach((meal) => {
+    const key = meal.matchedFoodName || meal.foodName;
+    if (!key) return;
+    if (!stats[key]) {
+      stats[key] = { count: 0, mealTypes: new Set() };
+    }
+    stats[key].count += 1;
+    if (meal.mealType) stats[key].mealTypes.add(meal.mealType);
+  });
+
+  return stats;
+};
+
+const getGoalBias = (goal) => {
+  if (goal === "weight_gain") {
+    return { protein: 1.3, calories: 1.15, carbs: 1.1, fats: 1.05, fiber: 0.95 };
+  }
+  if (goal === "weight_loss") {
+    return { protein: 1.35, calories: 0.7, carbs: 0.78, fats: 0.88, fiber: 1.25 };
+  }
+  return { protein: 1.15, calories: 0.95, carbs: 1, fats: 1, fiber: 1.1 };
+};
+
+const scoreFoodForPlan = ({ food, mealType, target, goalBias, history, usedNames, recentSelections }) => {
+  const caloriesGap = Math.abs(food.calories - target.calories);
+  const proteinGap = Math.abs(food.protein - target.protein);
+  const carbsGap = Math.abs(food.carbs - target.carbs);
+  const fatsGap = Math.abs(food.fats - target.fats);
+  const fiberGap = Math.abs(food.fiber - target.fiber);
+
+  const historyCount = history[food.name]?.count || 0;
+  const compatibleWithMealType = getFoodMealTypes(food).includes(mealType);
+  const repeatedPenalty = usedNames.has(food.name) ? 45 : 0;
+  const recentPenalty = recentSelections.includes(food.name) ? 25 : 0;
+
+  const score =
+    food.protein * goalBias.protein * 6 +
+    food.fiber * goalBias.fiber * 5 +
+    food.carbs * goalBias.carbs * 2.4 +
+    food.fats * goalBias.fats * 1.7 +
+    food.calories * goalBias.calories * 0.08 +
+    historyCount * 18 +
+    (compatibleWithMealType ? 60 : -25) -
+    caloriesGap * 0.22 -
+    proteinGap * 1.5 -
+    carbsGap * 0.42 -
+    fatsGap * 0.8 -
+    fiberGap * 0.95 -
+    repeatedPenalty -
+    recentPenalty;
+
+  return round1(score);
+};
+
+const pickMealsForDay = ({ targetsByMealType, goal, history, usedNames, dayIndex }) => {
+  const goalBias = getGoalBias(goal);
+  const mealOrder = ["breakfast", "lunch", "snacks", "dinner"];
+  const picks = [];
+  const recentSelections = [];
+
+  mealOrder.forEach((mealType, index) => {
+    const scored = foodDatabase
+      .map((food) => ({
+        food,
+        score: scoreFoodForPlan({
+          food,
+          mealType,
+          target: targetsByMealType[mealType],
+          goalBias,
+          history,
+          usedNames,
+          recentSelections,
+        }),
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    const chosen = scored[Math.min((dayIndex + index) % 2, Math.max(scored.length - 1, 0))] || scored[0];
+    if (!chosen) return;
+
+    picks.push({
+      mealType,
+      name: chosen.food.name,
+      servingLabel: chosen.food.servingLabel || "1 serving",
+      calories: chosen.food.calories,
+      protein: chosen.food.protein,
+    });
+    usedNames.add(chosen.food.name);
+    recentSelections.push(chosen.food.name);
+  });
+
+  return picks;
+};
+
+const buildWeeklyPlan = ({ profile, targets, recentMeals }) => {
+  const history = summarizeMealHistory(recentMeals);
+  const targetsByMealType = estimateMealTypeSplit(targets, profile.goal);
+  const rollingUsedNames = new Set();
+
+  return dayLabels.map((day, dayIndex) => {
+    const picks = pickMealsForDay({
+      targetsByMealType,
+      goal: profile.goal,
+      history,
+      usedNames: rollingUsedNames,
+      dayIndex,
+    });
+
+    const meals = picks.map(
+      (item) =>
+        `${toHumanMealType(item.mealType)}: ${item.name} (${item.servingLabel}, ${item.calories} kcal, ${item.protein}g protein)`
+    );
+
+    return { day, meals };
+  });
+};
+
+const toHumanMealType = (mealType) =>
+  String(mealType || "")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
 const scoreFoodMatch = (query, food) => {
   const cleanedQuery = normalize(query);
@@ -416,6 +599,7 @@ const getAiRecommendations = async (req, res, next) => {
     if (!profile) return res.status(404).json({ message: "Nutrition profile not found." });
 
     const meals = await MealEntry.find({ user: req.user._id, date });
+    const recentMeals = await MealEntry.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(30);
     const waterLogs = await WaterLog.find({ user: req.user._id, date });
     const targets = calculateTargets(profile);
     const intake = sumNutrition(meals, waterLogs);
@@ -445,15 +629,11 @@ const getAiRecommendations = async (req, res, next) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, 4);
 
-    const weeklyPlan = [
-      { day: "Monday", meals: ["Moong Dal Chilla", "Rajma Chawal", "Paneer Bhurji"] },
-      { day: "Tuesday", meals: ["Oats Upma", "Chicken Curry + Roti", "Chana Salad"] },
-      { day: "Wednesday", meals: ["Boiled Eggs + Fruit", "Brown Rice Bowl", "Sprouts Bhel"] },
-      { day: "Thursday", meals: ["Paneer Bhurji", "Rajma Chawal", "Greek Yogurt + Nuts"] },
-      { day: "Friday", meals: ["Oats Upma", "Chicken Curry", "Moong Dal Chilla"] },
-      { day: "Saturday", meals: ["Sprouts Bhel", "Chana Salad + Roti", "Banana Peanut Smoothie"] },
-      { day: "Sunday", meals: ["Boiled Eggs + Toast", "Brown Rice Bowl", "Paneer Bhurji"] },
-    ];
+    const weeklyPlan = buildWeeklyPlan({
+      profile,
+      targets,
+      recentMeals,
+    });
 
     res.json({
       whatToEatNext: nextMealSuggestions,
