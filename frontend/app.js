@@ -117,13 +117,13 @@ const attachLogout = () => {
 
   btn.addEventListener("click", () => {
     clearAuth();
-    window.location.href = "auth.html";
+    window.location.href = "login.html";
   });
 };
 
 const ensureAuth = () => {
   if (!getToken()) {
-    window.location.href = "auth.html";
+    window.location.href = "login.html";
   }
 };
 
@@ -183,7 +183,7 @@ const renderAuth = () => {
 
       setAuth(data.token, data.user);
       alert("Registration successful.");
-      window.location.href = "dashboard.html";
+      window.location.href = "login.html";
     } catch (error) {
       alert(error.message);
     }
@@ -287,13 +287,14 @@ const renderNutrition = async () => {
   const mealForm = document.getElementById("mealForm");
   const waterForm = document.getElementById("waterForm");
   const mealDateInput = document.getElementById("mealDate");
-  const foodSearchInput = document.getElementById("foodSearch");
-  const foodPickSelect = document.getElementById("foodPick");
+  const mealNameInput = document.getElementById("mealNameInput");
+  const lookupMealBtn = document.getElementById("lookupMealBtn");
+  const mealLookupResult = document.getElementById("mealLookupResult");
 
   mealDateInput.value = todayISO();
-  let selectedFoods = [];
   let dailyChart;
   let weeklyChart;
+  let latestMealLookup = null;
 
   const renderTargets = (targets) => {
     const container = document.getElementById("nutritionTargets");
@@ -315,16 +316,65 @@ const renderNutrition = async () => {
       .join("");
   };
 
-  const fillFoodSelect = (foods) => {
-    selectedFoods = foods;
-    foodPickSelect.innerHTML = `<option value="">Select food from database</option>${foods
-      .map((food, index) => `<option value="${index}">${food.name} (${food.calories} kcal)</option>`)
-      .join("")}`;
+  const resetMealLookup = (message) => {
+    latestMealLookup = null;
+    mealLookupResult.innerHTML = `<p class="meal-lookup-empty">${message}</p>`;
   };
 
-  const loadFoods = async (query = "") => {
-    const foods = await apiRequest(`/nutrition/foods${query ? `?q=${encodeURIComponent(query)}` : ""}`);
-    fillFoodSelect(foods);
+  const renderMealLookup = (lookup) => {
+    const confidenceText =
+      lookup.confidence === "high"
+        ? "High confidence match"
+        : lookup.confidence === "medium"
+          ? "Medium confidence match"
+          : "Lower confidence estimate";
+    const sourceLabel =
+      lookup.matchedFood && normalizeMealName(lookup.query) !== normalizeMealName(lookup.matchedFood.name)
+        ? `<p class="meal-lookup-match">Matched with <strong>${lookup.matchedFood.name}</strong></p>`
+        : `<p class="meal-lookup-match">Nutrition found for <strong>${lookup.query}</strong></p>`;
+    const servingText = lookup.matchedFood?.servingLabel
+      ? `<p class="meal-lookup-serving">Base serving: ${lookup.matchedFood.servingLabel} | ${confidenceText}</p>`
+      : "";
+    const partBreakdown =
+      lookup.parts && lookup.parts.length > 0
+        ? `<div class="meal-lookup-breakdown">${lookup.parts
+            .map(
+              (part) =>
+                `<div class="meal-lookup-breakdown-item"><strong>${part.query}</strong><span>${part.matchedFood.name} • ${part.servingLabel} • x${part.factor}</span></div>`
+            )
+            .join("")}</div>`
+        : "";
+
+    mealLookupResult.innerHTML = `
+      ${sourceLabel}
+      ${servingText}
+      <div class="meal-lookup-grid">
+        <div><span>Calories</span><strong>${lookup.nutrients.calories} kcal</strong></div>
+        <div><span>Protein</span><strong>${lookup.nutrients.protein} g</strong></div>
+        <div><span>Carbs</span><strong>${lookup.nutrients.carbs} g</strong></div>
+        <div><span>Fats</span><strong>${lookup.nutrients.fats} g</strong></div>
+        <div><span>Fiber</span><strong>${lookup.nutrients.fiber} g</strong></div>
+        <div><span>Quantity</span><strong>${lookup.quantity} serving</strong></div>
+      </div>
+      ${partBreakdown}
+    `;
+  };
+
+  const lookupMeal = async () => {
+    const mealName = mealNameInput.value.trim();
+    const quantity = Number(mealForm.elements.quantity.value || 1);
+
+    if (!mealName) {
+      resetMealLookup("Enter a meal name first so the app can estimate its nutrition.");
+      return null;
+    }
+
+    const lookup = await apiRequest(
+      `/nutrition/lookup?mealName=${encodeURIComponent(mealName)}&quantity=${encodeURIComponent(quantity)}`
+    );
+    latestMealLookup = lookup;
+    renderMealLookup(lookup);
+    return lookup;
   };
 
   const renderProgress = (summary) => {
@@ -387,6 +437,11 @@ const renderNutrition = async () => {
               (meal) => `
               <div class="list-item">
                 <strong>${toHumanGoal(meal.mealType)} - ${meal.foodName}</strong>
+                ${
+                  meal.matchedFoodName && meal.matchedFoodName !== meal.foodName
+                    ? `<div class="meta">Estimated using ${meal.matchedFoodName}</div>`
+                    : ""
+                }
                 <div class="meta">${meal.nutrients.calories} kcal | P ${meal.nutrients.protein}g | C ${meal.nutrients.carbs}g | F ${meal.nutrients.fats}g | Fi ${meal.nutrients.fiber}g</div>
                 <button class="btn-danger" data-delete-meal="${meal._id}">Delete</button>
               </div>
@@ -471,30 +526,50 @@ const renderNutrition = async () => {
     await refreshNutrition();
   });
 
-  foodSearchInput.addEventListener("input", async () => {
-    await loadFoods(foodSearchInput.value.trim());
+  const normalizeMealName = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+
+  mealNameInput.addEventListener("input", () => {
+    latestMealLookup = null;
+    if (!mealNameInput.value.trim()) {
+      resetMealLookup("Enter a meal name and click Get Nutrition. The app will estimate calories and macros for you.");
+    }
   });
 
-  foodPickSelect.addEventListener("change", () => {
-    const picked = selectedFoods[Number(foodPickSelect.value)];
-    if (!picked) return;
-    mealForm.elements.foodName.value = picked.name;
+  mealForm.elements.quantity.addEventListener("input", () => {
+    latestMealLookup = null;
   });
 
   mealForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const payload = Object.fromEntries(new FormData(mealForm).entries());
-    payload.foodName = payload.foodName || payload.manualFoodName;
     payload.quantity = Number(payload.quantity || 1);
-    delete payload.search;
-    delete payload.foodPick;
-    delete payload.manualFoodName;
+
+    const lookup =
+      latestMealLookup &&
+      normalizeMealName(latestMealLookup.query) === normalizeMealName(payload.foodName) &&
+      Number(latestMealLookup.quantity) === payload.quantity
+        ? latestMealLookup
+        : await lookupMeal();
+
+    if (!lookup) return;
 
     await apiRequest("/nutrition/meals", { method: "POST", body: JSON.stringify(payload) });
     mealForm.reset();
     mealDateInput.value = payload.date || todayISO();
-    await loadFoods();
+    resetMealLookup("Enter a meal name and click Get Nutrition. The app will estimate calories and macros for you.");
     await refreshNutrition();
+  });
+
+  lookupMealBtn.addEventListener("click", async () => {
+    try {
+      await lookupMeal();
+    } catch (error) {
+      resetMealLookup(error.message);
+    }
   });
 
   waterForm.addEventListener("submit", async (e) => {
@@ -510,7 +585,7 @@ const renderNutrition = async () => {
 
   mealDateInput.addEventListener("change", refreshNutrition);
 
-  await loadFoods();
+  resetMealLookup("Enter a meal name and click Get Nutrition. The app will estimate calories and macros for you.");
   await loadProfile();
   try {
     await refreshNutrition();
@@ -751,7 +826,7 @@ const init = async () => {
   const page = document.body.dataset.page;
 
   if (page === "home") renderHome();
-  if (page === "auth") renderAuth();
+  if (page === "auth" || page === "login" || page === "register") renderAuth();
   if (page === "dashboard") await renderDashboard();
   if (page === "workouts") await renderWorkouts();
   if (page === "community") await renderCommunity();

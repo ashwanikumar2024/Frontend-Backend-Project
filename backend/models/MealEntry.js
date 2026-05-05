@@ -20,6 +20,7 @@ const mealEntrySchema = new mongoose.Schema(
       required: true,
     },
     foodName: { type: String, required: true, trim: true },
+    matchedFoodName: { type: String, trim: true, default: "" },
     quantity: { type: Number, required: true, min: 0.1, default: 1 },
     unit: { type: String, default: "serving" },
     nutrients: {

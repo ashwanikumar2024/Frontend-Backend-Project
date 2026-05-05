@@ -7,14 +7,208 @@ const { calculateTargets, sumNutrition } = require("../utils/nutritionEngine");
 const getToday = () => new Date().toISOString().slice(0, 10);
 const round1 = (num) => Math.round(num * 10) / 10;
 const normalize = (text) => String(text || "").trim().toLowerCase();
+const stopWords = new Set(["and", "with", "the", "a", "an", "of", "meal", "dish", "food"]);
+const countWords = {
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+};
 
-const findFoodByName = (foodName) => {
-  const cleaned = normalize(foodName);
-  if (!cleaned) return null;
-  return (
-    foodDatabase.find((food) => normalize(food.name) === cleaned) ||
-    foodDatabase.find((food) => normalize(food.name).includes(cleaned) || cleaned.includes(normalize(food.name)))
+const toTokens = (text) =>
+  normalize(text)
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .map((token) => {
+      if (token.endsWith("s") && token.length > 3) return token.slice(0, -1);
+      return token;
+    })
+    .filter((token) => token && !stopWords.has(token));
+
+const splitMealParts = (text) =>
+  String(text || "")
+    .split(/\s*(?:\+|,|&|\band\b|\bwith\b)\s*/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+const extractCount = (text) => {
+  const normalized = normalize(text);
+  const digits = normalized.match(/(\d+(?:\.\d+)?)/);
+  if (digits) return Number(digits[1]);
+
+  const words = normalized.split(/\s+/);
+  for (const word of words) {
+    if (countWords[word]) return countWords[word];
+  }
+
+  return null;
+};
+
+const inferServingCount = (food) => {
+  const label = normalize(food.servingLabel || "1 serving");
+  const digits = label.match(/(\d+(?:\.\d+)?)/);
+  if (digits) return Number(digits[1]);
+  const [firstWord] = label.split(/\s+/);
+  return countWords[firstWord] || 1;
+};
+
+const scaleNutrients = (base, factor) => ({
+  calories: round1(Number(base.calories || 0) * factor),
+  protein: round1(Number(base.protein || 0) * factor),
+  carbs: round1(Number(base.carbs || 0) * factor),
+  fats: round1(Number(base.fats || 0) * factor),
+  fiber: round1(Number(base.fiber || 0) * factor),
+});
+
+const addNutrients = (items) =>
+  items.reduce(
+    (acc, item) => ({
+      calories: round1(acc.calories + item.calories),
+      protein: round1(acc.protein + item.protein),
+      carbs: round1(acc.carbs + item.carbs),
+      fats: round1(acc.fats + item.fats),
+      fiber: round1(acc.fiber + item.fiber),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 }
   );
+
+const getSearchTexts = (food) => [food.name, ...(food.aliases || [])];
+
+const scoreFoodMatch = (query, food) => {
+  const cleanedQuery = normalize(query);
+  const queryTokens = toTokens(query);
+
+  if (!cleanedQuery) return 0;
+  return Math.max(
+    ...getSearchTexts(food).map((candidate) => {
+      const cleanedCandidate = normalize(candidate);
+      const candidateTokens = toTokens(candidate);
+
+      if (cleanedQuery === cleanedCandidate) return 1000;
+      if (cleanedCandidate.includes(cleanedQuery) || cleanedQuery.includes(cleanedCandidate)) return 850;
+
+      const overlap = queryTokens.filter((token) =>
+        candidateTokens.some((candidateToken) => candidateToken.includes(token) || token.includes(candidateToken))
+      ).length;
+      const missingPenalty = Math.max(0, queryTokens.length - overlap) * 18;
+      return overlap * 110 - missingPenalty - Math.abs(queryTokens.length - candidateTokens.length) * 8;
+    })
+  );
+};
+
+const resolveSingleFood = (foodName) => {
+  const rankedFoods = foodDatabase
+    .map((food) => ({ food, score: scoreFoodMatch(foodName, food) }))
+    .sort((a, b) => b.score - a.score);
+  const best = rankedFoods[0];
+
+  if (!best || best.score < 60) return null;
+  return best;
+};
+
+const resolveMealNutrition = (foodName, quantity = 1, manualNutrients) => {
+  const safeQuantity = Math.max(0.1, Number(quantity) || 1);
+
+  if (manualNutrients) {
+    return {
+      quantity: safeQuantity,
+      matchedFood: null,
+      confidence: "manual",
+      parts: [],
+      nutrients: scaleNutrients(manualNutrients, safeQuantity),
+    };
+  }
+
+  const parts = splitMealParts(foodName);
+  const candidates = parts.length > 1 ? parts : [String(foodName || "").trim()];
+  const resolvedParts = [];
+
+  for (const part of candidates) {
+    const match = resolveSingleFood(part);
+    if (!match) return null;
+
+    const partCount = extractCount(part);
+    const servingCount = inferServingCount(match.food);
+    const factor = partCount ? partCount / servingCount : 1;
+    resolvedParts.push({
+      query: part,
+      matchedFood: match.food,
+      score: match.score,
+      factor: round1(factor),
+      servingLabel: match.food.servingLabel || "1 serving",
+      nutrients: scaleNutrients(match.food, factor),
+    });
+  }
+
+  if (resolvedParts.length === 0) {
+    return null;
+  }
+
+  const totalsBeforeQuantity = addNutrients(resolvedParts.map((part) => part.nutrients));
+  const averageScore = resolvedParts.reduce((sum, part) => sum + part.score, 0) / resolvedParts.length;
+  const confidence = averageScore >= 900 ? "high" : averageScore >= 700 ? "medium" : "low";
+  const matchedFoodLabel = resolvedParts.map((part) => part.matchedFood.name).join(" + ");
+
+  return {
+    quantity: safeQuantity,
+    matchedFood: {
+      name: matchedFoodLabel,
+      servingLabel:
+        resolvedParts.length === 1
+          ? resolvedParts[0].servingLabel
+          : `${resolvedParts.length} matched items`,
+    },
+    confidence,
+    parts: resolvedParts,
+    nutrients: scaleNutrients(totalsBeforeQuantity, safeQuantity),
+  };
+};
+
+const serializeFoodForClient = (food) => ({
+  name: food.name,
+  cuisine: food.cuisine,
+  servingLabel: food.servingLabel || "1 serving",
+  calories: food.calories,
+  protein: food.protein,
+  carbs: food.carbs,
+  fats: food.fats,
+  fiber: food.fiber,
+});
+
+const serializeResolvedMeal = (resolved) => ({
+  quantity: resolved.quantity,
+  confidence: resolved.confidence,
+  matchedFood: resolved.matchedFood
+    ? {
+        name: resolved.matchedFood.name,
+        servingLabel: resolved.matchedFood.servingLabel || "1 serving",
+      }
+    : null,
+  parts: (resolved.parts || []).map((part) => ({
+    query: part.query,
+    factor: part.factor,
+    score: round1(part.score),
+    servingLabel: part.servingLabel,
+    matchedFood: serializeFoodForClient(part.matchedFood),
+    nutrients: part.nutrients,
+  })),
+  nutrients: resolved.nutrients,
+});
+
+const getLookupMessage = (query, resolved) => {
+  if (!resolved.matchedFood) {
+    return `Using manual nutrition for "${query}".`;
+  }
+
+  if ((resolved.parts || []).length > 1) {
+    return `Estimated "${query}" using ${resolved.parts.map((part) => part.matchedFood.name).join(" + ")}.`;
+  }
+
+  return `Matched "${query}" with "${resolved.matchedFood.name}".`;
 };
 
 const getNutritionProfile = async (req, res, next) => {
@@ -64,12 +258,40 @@ const getFoods = async (req, res, next) => {
   try {
     const query = (req.query.q || "").trim().toLowerCase();
     const data = query
-      ? foodDatabase.filter(
-          (food) => food.name.toLowerCase().includes(query) || food.cuisine.toLowerCase().includes(query)
+      ? foodDatabase.filter((food) =>
+          [food.name, food.cuisine, ...(food.aliases || [])].some((text) => text.toLowerCase().includes(query))
         )
       : foodDatabase;
 
-    res.json(data.slice(0, 30));
+    res.json(data.slice(0, 30).map(serializeFoodForClient));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const lookupMealNutrition = async (req, res, next) => {
+  try {
+    const mealName = (req.query.mealName || req.query.foodName || req.body?.mealName || req.body?.foodName || "").trim();
+    const quantity = Number(req.query.quantity || req.body?.quantity || 1);
+
+    if (!mealName) {
+      res.status(400);
+      throw new Error("Meal name is required.");
+    }
+
+    const resolved = resolveMealNutrition(mealName, quantity);
+    if (!resolved) {
+      res.status(404);
+      throw new Error(
+        "Meal not found in nutrition database. Try a clearer meal name like 2 eggs, paneer bhurji, rajma chawal, or chicken curry + roti."
+      );
+    }
+
+    res.json({
+      query: mealName,
+      ...serializeResolvedMeal(resolved),
+      message: getLookupMessage(mealName, resolved),
+    });
   } catch (error) {
     next(error);
   }
@@ -91,33 +313,23 @@ const addMeal = async (req, res, next) => {
       throw new Error("Meal type and food name are required.");
     }
 
-    const safeQuantity = Math.max(0.1, Number(quantity) || 1);
-    const dbFood = findFoodByName(foodName);
-    const baseNutrients = nutrients || dbFood;
-
-    if (!baseNutrients) {
+    const resolved = resolveMealNutrition(foodName, quantity, nutrients);
+    if (!resolved) {
       res.status(400);
       throw new Error(
-        "Food not found in nutrition database. Please search and select an available food item."
+        "Food not found in nutrition database. Please try a simpler meal name such as paneer, eggs, chicken curry, oats, or rajma chawal."
       );
     }
-
-    const scaledNutrients = {
-      calories: round1(Number(baseNutrients.calories || 0) * safeQuantity),
-      protein: round1(Number(baseNutrients.protein || 0) * safeQuantity),
-      carbs: round1(Number(baseNutrients.carbs || 0) * safeQuantity),
-      fats: round1(Number(baseNutrients.fats || 0) * safeQuantity),
-      fiber: round1(Number(baseNutrients.fiber || 0) * safeQuantity),
-    };
 
     const meal = await MealEntry.create({
       user: req.user._id,
       date,
       mealType,
-      foodName,
-      quantity: safeQuantity,
+      foodName: String(foodName).trim(),
+      matchedFoodName: resolved.matchedFood?.name || "",
+      quantity: resolved.quantity,
       unit,
-      nutrients: scaledNutrients,
+      nutrients: resolved.nutrients,
     });
 
     res.status(201).json(meal);
@@ -290,6 +502,7 @@ module.exports = {
   getNutritionProfile,
   upsertNutritionProfile,
   getFoods,
+  lookupMealNutrition,
   addMeal,
   getMealsByDate,
   deleteMeal,

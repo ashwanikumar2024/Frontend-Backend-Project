@@ -4,6 +4,7 @@ const {
   getNutritionProfile,
   upsertNutritionProfile,
   getFoods,
+  lookupMealNutrition,
   addMeal,
   getMealsByDate,
   deleteMeal,
@@ -20,6 +21,7 @@ router.use(protect);
 router.get("/profile", getNutritionProfile);
 router.put("/profile", upsertNutritionProfile);
 router.get("/foods", getFoods);
+router.get("/lookup", lookupMealNutrition);
 router.get("/meals", getMealsByDate);
 router.post("/meals", addMeal);
 router.delete("/meals/:id", deleteMeal);

@@ -268,6 +268,68 @@ body.dark .glass {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.auth-shell {
+  width: min(720px, 92%);
+  min-height: calc(100vh - 130px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 1.7rem;
+}
+
+.auth-card-wide {
+  max-width: 720px;
+}
+
+.auth-eyebrow {
+  margin: 0 0 0.4rem;
+  color: var(--secondary);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.auth-copy {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.auth-form-register {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0.8rem;
+}
+
+.auth-form-register .btn-primary {
+  grid-column: 1 / -1;
+}
+
+.auth-switch {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-danger {
@@ -437,6 +499,10 @@ textarea {
   .grid-2,
   .grid-3,
   .auth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-form-register {
     grid-template-columns: 1fr;
   }
 }
@@ -896,6 +962,11 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.nutrition-form .btn-secondary,
+.meal-lookup-result {
+  grid-column: 1 / -1;
+}
+
 .nutrition-targets {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -960,6 +1031,71 @@ textarea {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.7rem;
+}
+
+.meal-lookup-result {
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.meal-lookup-empty,
+.meal-lookup-match,
+.meal-lookup-serving {
+  margin: 0;
+}
+
+.meal-lookup-match {
+  margin-bottom: 0.35rem;
+}
+
+.meal-lookup-serving {
+  margin-bottom: 0.75rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.meal-lookup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.7rem;
+}
+
+.meal-lookup-grid div {
+  padding: 0.7rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.meal-lookup-grid span {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.meal-lookup-breakdown {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.meal-lookup-breakdown-item {
+  padding: 0.7rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.meal-lookup-breakdown-item strong,
+.meal-lookup-breakdown-item span {
+  display: block;
+}
+
+.meal-lookup-breakdown-item span {
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .reminder-list {

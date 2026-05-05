@@ -63,10 +63,12 @@
             <option value="dinner">Dinner</option>
             <option value="snacks">Snacks</option>
           </select>
-          <input type="text" name="search" id="foodSearch" placeholder="Search food (e.g. paneer)" />
-          <select name="foodPick" id="foodPick"></select>
-          <input type="text" name="foodName" id="manualFoodName" placeholder="Or type meal name (must exist in DB)" />
+          <input type="text" name="foodName" id="mealNameInput" placeholder="Enter meal name (e.g. 2 eggs, paneer bhurji, chicken curry + 2 roti)" required />
           <input type="number" step="0.1" min="0.1" name="quantity" placeholder="Quantity" value="1" />
+          <button class="btn-secondary" type="button" id="lookupMealBtn">Get Nutrition</button>
+          <div id="mealLookupResult" class="meal-lookup-result">
+            <p class="meal-lookup-empty">Enter a meal name and click Get Nutrition. The app will estimate calories and macros for you.</p>
+          </div>
           <button class="btn-primary" type="submit">Add Meal</button>
         </form>
       </section>
