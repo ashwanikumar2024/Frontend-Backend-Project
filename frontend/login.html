@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | SportsFit</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="login">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+    <header class="topbar glass">
+      <h1>Welcome Back to SportsFit</h1>
+      <div class="topbar-actions">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-secondary" href="../index.html">Home</a>
+      </div>
+    </header>
+
+    <main class="container auth-shell">
+      <section class="card auth-card">
+        <p class="auth-eyebrow">Sign In</p>
+        <h2>Login to your account</h2>
+        <p class="auth-copy">Track workouts, meals, and your progress from one place.</p>
+
+        <form id="loginForm" class="auth-form">
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Password" required />
+          <button class="btn-primary" type="submit">Login</button>
+        </form>
+
+        <p class="auth-switch">Don't have an account? <a href="register.html">Create one</a></p>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

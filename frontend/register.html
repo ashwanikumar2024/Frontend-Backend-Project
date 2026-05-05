@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | SportsFit</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="register">
+    <div class="loader-overlay" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+    <header class="topbar glass">
+      <h1>Create Your SportsFit Account</h1>
+      <div class="topbar-actions">
+        <button class="btn-secondary" id="themeToggle">Toggle Theme</button>
+        <a class="btn-secondary" href="../index.html">Home</a>
+      </div>
+    </header>
+
+    <main class="container auth-shell">
+      <section class="card auth-card auth-card-wide">
+        <p class="auth-eyebrow">Sign Up</p>
+        <h2>Create your account</h2>
+        <p class="auth-copy">Set up your profile once, then log in anytime to continue your fitness journey.</p>
+
+        <form id="registerForm" class="auth-form auth-form-register">
+          <input type="text" name="name" placeholder="Full Name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Password (min 6 chars)" required />
+          <select name="goal" required>
+            <option value="weight_loss">Weight Loss</option>
+            <option value="weight_gain">Weight Gain</option>
+            <option value="maintain" selected>Maintain</option>
+          </select>
+          <select name="gender">
+            <option value="male" selected>Male</option>
+            <option value="female">Female</option>
+          </select>
+          <input type="number" name="age" placeholder="Age" min="10" max="100" />
+          <input type="number" name="heightCm" placeholder="Height (cm)" min="100" max="250" />
+          <input type="number" name="weightKg" placeholder="Weight (kg)" min="30" max="250" />
+          <button class="btn-primary" type="submit">Create Account</button>
+        </form>
+
+        <p class="auth-switch">Already have an account? <a href="login.html">Login here</a></p>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
