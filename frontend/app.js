@@ -734,32 +734,129 @@ const initScrollReveal = () => {
 const renderCommunity = async () => {
   const postForm = document.getElementById("postForm");
   const postsList = document.getElementById("postsList");
+  const postContent = document.getElementById("postContent");
+  const promptChips = document.getElementById("communityPromptChips");
+  const challengeBox = document.getElementById("communityChallenges");
+  const topicsBox = document.getElementById("communityTopics");
+  const feedMeta = document.getElementById("communityFeedMeta");
+  const user = getUser();
+
+  const promptIdeas = [
+    "I completed my workout even though I almost skipped it today.",
+    "My biggest nutrition win this week was staying consistent with protein.",
+    "Can someone suggest a simple evening workout for fat loss?",
+    "Today I feel proud because I improved my discipline a little more.",
+  ];
+
+  const challengeIdeas = [
+    {
+      title: "5-Day Consistency Sprint",
+      text: "Complete at least one workout or one healthy meal log for five straight days.",
+    },
+    {
+      title: "Protein Focus Challenge",
+      text: "Try to hit your protein target on three different days this week.",
+    },
+    {
+      title: "Hydration Reset",
+      text: "Log your water intake daily and aim to finish your target before dinner.",
+    },
+  ];
+
+  const topicIdeas = ["Weight Loss", "Muscle Gain", "Home Workouts", "Meal Prep", "Consistency", "Recovery"];
+
+  const renderCommunityIntro = () => {
+    promptChips.innerHTML = promptIdeas
+      .map((idea, index) => `<button type="button" class="community-chip" data-prompt-index="${index}">${idea}</button>`)
+      .join("");
+
+    challengeBox.innerHTML = challengeIdeas
+      .map(
+        (item) => `
+          <article class="community-challenge">
+            <strong>${item.title}</strong>
+            <p>${item.text}</p>
+          </article>
+        `
+      )
+      .join("");
+
+    topicsBox.innerHTML = topicIdeas
+      .map((topic) => `<button type="button" class="community-chip community-chip-topic" data-topic="${topic}">#${topic}</button>`)
+      .join("");
+
+    promptChips.querySelectorAll("[data-prompt-index]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        postContent.value = promptIdeas[Number(btn.dataset.promptIndex)];
+        postContent.focus();
+      });
+    });
+
+    topicsBox.querySelectorAll("[data-topic]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const topic = btn.dataset.topic;
+        postContent.value = `Looking for advice about ${topic.toLowerCase()}. What has worked for you?`;
+        postContent.focus();
+      });
+    });
+  };
 
   const loadPosts = async () => {
     const posts = await apiRequest("/posts");
+    feedMeta.innerHTML = `
+      <div class="community-stat">
+        <strong>${posts.length}</strong>
+        <span>Total posts</span>
+      </div>
+      <div class="community-stat">
+        <strong>${user?.name || "You"}</strong>
+        <span>Ready to contribute</span>
+      </div>
+    `;
+
+    if (posts.length === 0) {
+      postsList.innerHTML = `
+        <div class="community-empty">
+          <h3>Be the first one to post</h3>
+          <p>Start the community with a goal update, a progress win, or a question for others.</p>
+        </div>
+      `;
+      return;
+    }
 
     postsList.innerHTML = posts
       .map(
         (post) => `
-          <div class="list-item">
-            <strong>${post.user?.name || "Athlete"}</strong>
-            <div class="meta">${formatDate(post.createdAt)}</div>
-            <p>${post.content}</p>
+          <article class="list-item community-post">
+            <div class="community-post-head">
+              <div>
+                <strong>${post.user?.name || "Athlete"}</strong>
+                <div class="meta">${formatDate(post.createdAt)}</div>
+              </div>
+              <span class="community-post-badge">${post.likes.length} likes</span>
+            </div>
+            <p class="community-post-copy">${post.content}</p>
             <div class="topbar-actions">
               <button class="btn-secondary" data-like="${post._id}">Like (${post.likes.length})</button>
             </div>
-            <div class="meta">Comments:</div>
-            ${(post.comments || [])
-              .map(
-                (comment) =>
-                  `<div class="meta">- ${comment.user?.name || "User"}: ${comment.text}</div>`
-              )
-              .join("")}
-            <form data-comment-form="${post._id}">
+            <div class="community-comments">
+              <div class="meta">Comments</div>
+              ${
+                (post.comments || []).length > 0
+                  ? (post.comments || [])
+                      .map(
+                        (comment) =>
+                          `<div class="community-comment"><strong>${comment.user?.name || "User"}</strong><span>${comment.text}</span></div>`
+                      )
+                      .join("")
+                  : `<div class="meta">No comments yet. Start the conversation.</div>`
+              }
+            </div>
+            <form data-comment-form="${post._id}" class="community-comment-form">
               <input name="comment" placeholder="Write a comment..." required />
               <button class="btn-primary" type="submit">Comment</button>
             </form>
-          </div>`
+          </article>`
       )
       .join("");
 
@@ -812,6 +909,7 @@ const renderCommunity = async () => {
   });
 
   try {
+    renderCommunityIntro();
     await loadPosts();
   } catch (error) {
     alert(error.message);

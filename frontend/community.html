@@ -21,18 +21,39 @@
       </nav>
     </header>
 
-    <main class="container grid-2">
-      <section class="card">
-        <h2>Share Update</h2>
-        <form id="postForm">
-          <textarea id="postContent" placeholder="Share your latest fitness achievement..." required></textarea>
-          <button class="btn-primary" type="submit">Post Update</button>
-        </form>
+    <main class="container community-layout">
+      <section class="community-column">
+        <section class="card">
+          <p class="community-kicker">Share With The Team</p>
+          <h2>Post an update</h2>
+          <p class="community-copy">Celebrate progress, ask for advice, or share what kept you motivated today.</p>
+          <div id="communityPromptChips" class="community-chip-row"></div>
+          <form id="postForm">
+            <textarea id="postContent" placeholder="Share your latest fitness achievement..." required></textarea>
+            <button class="btn-primary" type="submit">Post Update</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <p class="community-kicker">This Week</p>
+          <h2>Community challenges</h2>
+          <div id="communityChallenges" class="community-stack"></div>
+        </section>
       </section>
 
-      <section class="card">
-        <h2>Community Feed</h2>
-        <div id="postsList" class="list"></div>
+      <section class="community-column">
+        <section class="card">
+          <p class="community-kicker">Discover</p>
+          <h2>Popular topics</h2>
+          <div id="communityTopics" class="community-chip-row"></div>
+        </section>
+
+        <section class="card">
+          <p class="community-kicker">Members</p>
+          <h2>Community feed</h2>
+          <div id="communityFeedMeta" class="community-feed-meta"></div>
+          <div id="postsList" class="list"></div>
+        </section>
       </section>
     </main>
     <script src="app.js"></script>
